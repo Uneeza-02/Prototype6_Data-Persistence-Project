@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -12,9 +11,15 @@ public class MainManager : MonoBehaviour
 
     public Text ScoreText;
     public GameObject GameOverText;
-    
+
+    public Text HighScoreText;
+
     private bool m_Started = false;
+    private int HighScore = 0;
     private int m_Points;
+
+    private string TopPlayer = "";
+    private string Name = "";
     
     private bool m_GameOver = false;
 
@@ -22,6 +27,11 @@ public class MainManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //DeleteSaveFile();
+        LoadPlayerData();
+
+        SetNameAndScore();
+
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -36,6 +46,22 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+    }
+
+    void SetNameAndScore()
+    {
+        if (NameManager.Instance != null)
+        {
+            Name = NameManager.Instance.GetPlayerName();
+
+            Debug.Log("TP" +TopPlayer);
+            if (TopPlayer == "")
+            {
+                TopPlayer = Name;
+            }
+        }
+
+        HighScoreText.text = "Best Score : " + TopPlayer + " : " + HighScore;
     }
 
     private void Update()
@@ -72,5 +98,57 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+
+        if (m_Points > HighScore) SavePlayerData();
+    }
+
+    [System.Serializable]
+    class SaveData
+    {
+        public int HighScore;
+        public string Name;
+    }
+
+    public void SavePlayerData()
+    {
+        SaveData data = new SaveData();
+        data.HighScore = m_Points;
+        data.Name = Name; 
+
+        string json = JsonUtility.ToJson(data);
+        File.WriteAllText(Application.persistentDataPath + "/savefile.json", json);
+    }
+
+    public void LoadPlayerData()
+    {
+        string path = Application.persistentDataPath + "/savefile.json";
+
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            SaveData data = JsonUtility.FromJson<SaveData>(json);
+            HighScore = data.HighScore;
+            TopPlayer = data.Name;
+        }
+    }
+
+    public void Exit()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+    public void DeleteSaveFile()
+    {
+        string path = Application.persistentDataPath + "/savefile.json";
+
+        if (File.Exists(path))
+        {
+            File.Delete(path);
+            Debug.Log("Save file deleted.");
+        }
+        else
+        {
+            Debug.Log("No save file found.");
+        }
     }
 }
