@@ -29,7 +29,6 @@ public class MainManager : MonoBehaviour
     {
         //DeleteSaveFile();
         LoadPlayerData();
-
         SetNameAndScore();
 
         const float step = 0.6f;
@@ -54,7 +53,6 @@ public class MainManager : MonoBehaviour
         {
             Name = NameManager.Instance.GetPlayerName();
 
-            Debug.Log("TP" +TopPlayer);
             if (TopPlayer == "")
             {
                 TopPlayer = Name;
@@ -96,10 +94,10 @@ public class MainManager : MonoBehaviour
 
     public void GameOver()
     {
+        if (m_Points > HighScore) SavePlayerData();
+
         m_GameOver = true;
         GameOverText.SetActive(true);
-
-        if (m_Points > HighScore) SavePlayerData();
     }
 
     [System.Serializable]

@@ -1,12 +1,9 @@
 using UnityEngine;
-using TMPro;
 using System.IO;
 
 public class NameManager : MonoBehaviour
 {
     public static NameManager Instance;
-    public TMP_InputField Name;
-
     public string PlayerName;
 
     void Awake()
@@ -14,6 +11,7 @@ public class NameManager : MonoBehaviour
         if (Instance != null)
         {
             Destroy(gameObject);
+            return;
         }
 
         Instance = this;
@@ -32,7 +30,7 @@ public class NameManager : MonoBehaviour
     public void SaveName()
     {
         SaveData data = new SaveData();
-        data.Name = Name.text;
+        data.Name = PlayerName;
 
         string json = JsonUtility.ToJson(data);
         File.WriteAllText(Application.persistentDataPath + "/savenamefile.json", json);
@@ -47,14 +45,11 @@ public class NameManager : MonoBehaviour
             string json = File.ReadAllText(path);
             SaveData data = JsonUtility.FromJson<SaveData>(json);
             PlayerName = data.Name;
-            if (Name != null) Name.text = data.Name;
         }
     }
 
     public string GetPlayerName()
     {
-        LoadName();
-        Debug.Log(PlayerName);
         return PlayerName;
     }
 
